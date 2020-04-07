@@ -25,6 +25,15 @@ dependencies:
   cupertino_icons: ^0.1.2
   firebase_auth:
   firebase_database:
+  get_it: ^4.0.1
+  provider:
+  async:
+  image_picker: ^0.6.2
+  google_sign_in: 
+  intl: ^0.15.8
+  url_launcher:
+  share: ^0.6.3
+  google_fonts: ^0.3.9
 
 dev_dependencies:
   flutter_test:
