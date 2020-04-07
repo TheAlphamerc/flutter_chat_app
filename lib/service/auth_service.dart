@@ -1,17 +1,20 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_chat_app/helper/enum.dart';
+import 'package:flutter_chat_app/helper/logger.dart';
 import 'package:flutter_chat_app/model/user.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:logger/logger.dart';
 
 class AuthService {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final DatabaseReference kDatabase = FirebaseDatabase.instance.reference();
-
+  final log = getLogger("AuthService");
   Future<FirebaseUser> handleGoogleSignIn() async {
     try {
       final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+      
       if (googleUser == null) {
         throw Exception('Google login cancelled by user');
       }
@@ -23,9 +26,10 @@ class AuthService {
         idToken: googleAuth.idToken,
       );
       var user = (await _firebaseAuth.signInWithCredential(credential)).user;
+      log.log(Level.info,"Google login success");
       return user;
     } catch (error) {
-      print(error);
+      log.e(error);
       return null;
     }
   }
@@ -50,9 +54,7 @@ class AuthService {
         isVerified: user.isEmailVerified,
       );
       createUser(model, newUser: true);
-    // } else {
-    //   print('Last login at: ${user.metadata.lastSignInTime}');
-    // }
+      log.log(Level.info,"User created");
   }
 
   /// `Create` and `Update` user
