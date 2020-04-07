@@ -34,6 +34,9 @@ dependencies:
   url_launcher:
   share: ^0.6.3
   google_fonts: ^0.3.9
+  logger:
+  rxdart: 
+  cloud_firestore:
 
 dev_dependencies:
   flutter_test:
