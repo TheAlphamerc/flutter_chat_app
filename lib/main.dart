@@ -1,11 +1,12 @@
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_app/locator.dart';
-import 'package:flutter_chat_app/page/home_page.dart';
+import 'package:flutter_chat_app/state/app_state.dart';
 import 'package:flutter_chat_app/state/auth_state.dart';
+import 'package:flutter_chat_app/state/chat_state.dart';
 import 'package:flutter_chat_app/theme/theme.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+
+import 'helper/routes.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,13 +21,17 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<AuthState>(create: (_) => AuthState()),
+        ChangeNotifierProvider<AppState>(create: (_) => AppState()),
+        ChangeNotifierProvider<ChatState>(create: (_) => ChatState()),
       ],
       child: MaterialApp(
-        title: 'Flutter Demo',
-        theme: AppTheme.darkTheme,
-        themeMode: ThemeMode.light,
-        home: MyHomePage(title: 'Flutter Demo Home Page'),
-      ),
+          title: 'Flutter Demo',
+          theme: AppTheme.darkTheme,
+          themeMode: ThemeMode.light,
+          routes: Routes.route(),
+          onGenerateRoute: (settings) => Routes.onGenerateRoute(settings),
+          onUnknownRoute: (settings) => Routes.onUnknownRoute(settings),
+        ),
     );
   }
 }

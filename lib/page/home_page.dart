@@ -2,23 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_app/model/user.dart';
 import 'package:flutter_chat_app/state/auth_state.dart';
 import 'package:flutter_chat_app/theme/styles.dart';
+import 'package:flutter_chat_app/widgets/bottomMenuBar.dart';
+import 'package:flutter_chat_app/widgets/customWidgets.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_chat_app/theme/extentions.dart';
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-  final String title;
-
+class HomePage extends StatefulWidget {
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _HomePageState createState() => _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  void _login() {
-    var state = Provider.of<AuthState>(context, listen: false);
-    state.loginViaGoogle();
-  }
-
+class _HomePageState extends State<HomePage> {
   Widget _appBar() {
     return Container(
       color: Theme.of(context).secondaryHeaderColor,
@@ -27,7 +21,7 @@ class _MyHomePageState extends State<MyHomePage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Text(
-            'Chat',
+            'Chats',
             style: TextStyles.title,
           ),
           Icon(Icons.search),
@@ -42,19 +36,24 @@ class _MyHomePageState extends State<MyHomePage> {
       children: <Widget>[
         Padding(
           padding: EdgeInsets.all(16),
-          child: Text('Favourites', style: TextStyles.bodySm.bold,),
+          child: Text(
+            'Favourites',
+            style: TextStyles.bodySm.bold,
+          ),
         ),
         SizedBox(
           height: 60,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) {
-              return _avatar(null).p(8);
+              return userAvatar(null).p(8);
             },
             itemCount: 25,
           ),
         ),
-        SizedBox(height: 16,),
+        SizedBox(
+          height: 16,
+        ),
         Divider(
           height: 0,
           color: Theme.of(context).dividerColor,
@@ -63,13 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _avatar(User user) {
-    user = User(
-      profilePic:
-          'http://www.azembelani.co.za/wp-content/uploads/2016/07/20161014_58006bf6e7079-3.png',
-    );
-    return CircleAvatar(radius: 30, child: Image.network(user.profilePic));
-  }
+  
 
   Widget _userList() {
     return ListView.builder(
@@ -79,33 +72,42 @@ class _MyHomePageState extends State<MyHomePage> {
       itemCount: 100,
     );
   }
-  Widget _userTile(){
+
+  Widget _userTile() {
     return ListTile(
-          leading: _avatar(null),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween, 
-            children: <Widget>[
-              Text(
-                "John",
-                style: TextStyles.titleFont.white,
-              ),
-              Text('1:04am', style: TextStyles.bodySm.lighGrey,)
-            ],
+      leading: userAvatar(null),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text(
+            "John",
+            style: TextStyles.titleMedium.white,
           ),
-          subtitle: Text(description("Is it possible to create an “extension methods” for the Widgets? Is it possible to create an “extension methods” for the Widgets?"), style: TextStyles.bodySm.dimWhite),
-        ).vP4;
+          Text(
+            '1:04am',
+            style: TextStyles.bodySm.lighGrey,
+          )
+        ],
+      ),
+      subtitle: Text(
+          description(
+              "Is it possible to create an “extension methods” for the Widgets? Is it possible to create an “extension methods” for the Widgets?"),
+          style: TextStyles.bodySm.dimWhite),
+    ).vP4.ripple(() {
+      Navigator.of(context).pushNamed('/ChatScreenPage');
+    });
   }
-  String description(String msg){
-    if(msg.isNotEmpty && msg.length > 50){
-      return msg.substring(0,38) + "...";
-    }
-    else if(msg.isNotEmpty){
+
+  String description(String msg) {
+    if (msg.isNotEmpty && msg.length > 50) {
+      return msg.substring(0, 38) + "...";
+    } else if (msg.isNotEmpty) {
+      return msg;
+    } else {
       return msg;
     }
-    else{
-      return msg;
-    }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -119,7 +121,6 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             _appBar(),
             _favouriteList(),
-            
             _userList().extended,
           ],
         ),

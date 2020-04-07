@@ -17,6 +17,7 @@ class AppTheme {
       ),
     ),
     dividerColor: DarkColor.lightGrey,
+    bottomAppBarColor:  DarkColor.darkGrey,
     iconTheme: IconThemeData(color: DarkColor.lightGrey),
   );
 }
