@@ -32,8 +32,8 @@ class _BottomMenubarState extends State<BottomMenubar> {
         children: <Widget>[
           _icon(Icons.home, 0),
           _icon(Icons.message, 1),
-          _icon(Icons.people, 3),
-          _icon(Icons.settings, 4),
+          _icon(Icons.people, 2),
+          _icon(Icons.settings, 3),
         ],
       ),
     );

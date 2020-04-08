@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_app/locator.dart';
 import 'package:flutter_chat_app/model/user.dart';
+import 'package:flutter_chat_app/service/users_repository.dart';
 import 'package:flutter_chat_app/state/auth_state.dart';
 import 'package:flutter_chat_app/theme/styles.dart';
 import 'package:flutter_chat_app/widgets/bottomMenuBar.dart';
@@ -7,30 +9,21 @@ import 'package:flutter_chat_app/widgets/customWidgets.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_chat_app/theme/extentions.dart';
 
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  Widget _appBar() {
+class HomePage extends StatelessWidget {
+  Widget _appBar(BuildContext context) {
     return Container(
       color: Theme.of(context).secondaryHeaderColor,
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Text(
-            'Chats',
-            style: TextStyles.title,
-          ),
-          Icon(Icons.search),
+          Text('Chats'),
         ],
       ),
     );
   }
 
-  Widget _favouriteList() {
+  Widget _favouriteList(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -62,25 +55,36 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  
-
-  Widget _userList() {
-    return ListView.builder(
-      itemBuilder: (context, index) {
-        return _userTile();
+  Widget _userList(BuildContext context) {
+    return StreamBuilder(
+      stream: getIt<UsersRepository>().users,
+      builder: (context, AsyncSnapshot<List<User>> snapshot) {
+        if (snapshot.hasData) {
+          return ListView.builder(
+            itemBuilder: (context, index) {
+              return _userTile(context, snapshot.data[index]);
+            },
+            itemCount: snapshot.data.length,
+          );
+        }
+        if(snapshot.connectionState == ConnectionState.done){
+          return Text("No Users Available");
+        }
+        else{
+          return loader();
+        }
       },
-      itemCount: 100,
     );
   }
 
-  Widget _userTile() {
+  Widget _userTile(BuildContext context, User model) {
     return ListTile(
-      leading: userAvatar(null),
+      leading: userAvatar(model),
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Text(
-            "John",
+            model.displayName,
             style: TextStyles.titleMedium.white,
           ),
           Text(
@@ -112,6 +116,13 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).secondaryHeaderColor,
+        title: _appBar(context),
+        actions: <Widget>[
+          IconButton(icon: Icon(Icons.search), onPressed: () {}),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
         child: Icon(Icons.add),
@@ -119,9 +130,9 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         child: Column(
           children: <Widget>[
-            _appBar(),
-            _favouriteList(),
-            _userList().extended,
+            // _appBar(),
+            _favouriteList(context),
+            _userList(context).extended,
           ],
         ),
       ),

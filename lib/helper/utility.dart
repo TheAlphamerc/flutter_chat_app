@@ -1,12 +1,15 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_app/helper/logger.dart';
 import 'package:flutter_chat_app/widgets/customWidgets.dart';
 import 'package:intl/intl.dart';
 import 'package:share/share.dart';
+import 'package:logger/logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 final DatabaseReference kDatabase = FirebaseDatabase.instance.reference();
+final log = getLogger("General");
 
 String getPostTime2(String date) {
   if (date == null || date.isEmpty) {
@@ -116,14 +119,16 @@ launchURL(String url) async {
 }
 
 void cprint(dynamic data, {String errorIn, String event}) {
+
   if (errorIn != null) {
-    print(
+    final log = getLogger("errorIn");
+    log.d(
         '****************************** error ******************************');
-    print('[Error] $errorIn $data');
-    print(
+    log.e('[Error] $errorIn $data');
+    log.d(
         '****************************** error ******************************');
   } else if (data != null) {
-    print(data);
+    log.i(data);
   }
   if (event != null) {
     logEvent(event);

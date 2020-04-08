@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_chat_app/helper/enum.dart';
 import 'package:flutter_chat_app/helper/logger.dart';
+import 'package:flutter_chat_app/helper/utility.dart';
 import 'package:flutter_chat_app/model/user.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:logger/logger.dart';
@@ -39,7 +41,7 @@ class AuthService {
     var diff = DateTime.now().difference(user.metadata.creationTime);
     // Check if user is new or old
     // If user is new then add new user to firebase realtime kDatabase
-    // if (diff < Duration(seconds: 15)) {
+    if (diff < Duration(seconds: 15)) {
       User model = User(
         bio: 'Edit profile to update bio',
         dob: DateTime(1950, DateTime.now().month, DateTime.now().day + 3)
@@ -54,7 +56,8 @@ class AuthService {
         isVerified: user.isEmailVerified,
       );
       createUser(model, newUser: true);
-      log.log(Level.info,"User created");
+    }
+      
   }
 
   /// `Create` and `Update` user
@@ -69,13 +72,15 @@ class AuthService {
       user.createdAt = DateTime.now().toUtc().toString();
     }
     kDatabase.child('profile').child(user.userId).set(user.toJson());
+    
+    
+    log.log(Level.info,"User created");
   }
+  
 
-  String getUserName({String name, String id}) {
-    String userName = '';
-    name = name.split(' ')[0];
-    id = id.substring(0, 4).toLowerCase();
-    userName = '@$name$id';
-    return userName;
+  void logout(){
+    _firebaseAuth.signOut();
+    _googleSignIn.signOut();
+    log.wtf("Logout Sucess");
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_app/theme/dark_clolor.dart';
+import 'package:flutter_chat_app/theme/styles.dart';
 import 'package:google_fonts/google_fonts.dart';
+export 'extentions.dart';
 
 class AppTheme {
   static ThemeData darkTheme = ThemeData(
@@ -19,5 +21,12 @@ class AppTheme {
     dividerColor: DarkColor.lightGrey,
     bottomAppBarColor:  DarkColor.darkGrey,
     iconTheme: IconThemeData(color: DarkColor.lightGrey),
+    appBarTheme: AppBarTheme(
+      textTheme: TextTheme(
+        title:  TextStyles.title,
+      ),
+      color:DarkColor.darkGrey,
+      iconTheme: IconThemeData(color: DarkColor.lightGrey)
+    ),
   );
 }

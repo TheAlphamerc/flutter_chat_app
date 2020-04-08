@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_app/helper/utility.dart';
@@ -13,27 +15,18 @@ import 'package:flutter_chat_app/theme/extentions.dart';
 class ChatScreenPage extends StatelessWidget {
   ChatScreenPage({Key key}) : super(key: key);
   Widget _appBar(BuildContext context) {
-    return Container(
-      color: Theme.of(context).secondaryHeaderColor,
-      padding: EdgeInsets.symmetric(horizontal: 0, vertical: 16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          userAvatar(null, radius: 20),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text('Michel', style: TextStyles.titleMedium.white),
-              Text('online', style: TextStyles.bodySm.dimWhite),
-            ],
-          ).hP16,
-          Spacer(),
-          Icon(
-            Icons.more_vert,
-            color: Theme.of(context).iconTheme.color,
-          ).hP16,
-        ],
-      ),
+    return Row(
+      children: <Widget>[
+        userAvatar(null, radius: 20),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text('Michel', style: TextStyles.titleMedium.white),
+            Text('online', style: TextStyles.bodySm.dimWhite),
+          ],
+        ).hP16,
+        Spacer(),
+      ],
     );
   }
 
@@ -87,13 +80,6 @@ class ChatScreenPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
             SizedBox(width: 15),
-            myMessage
-                ? SizedBox()
-                : userAvatar(
-                    User(
-                      profilePic: userImage,
-                    ),
-                    radius: 20),
             Expanded(
               child: Container(
                 alignment:
@@ -101,7 +87,7 @@ class ChatScreenPage extends StatelessWidget {
                 margin: EdgeInsets.only(
                   right: myMessage ? 10 : (fullWidth(context) / 4),
                   top: 20,
-                  left: myMessage ? (fullWidth(context) / 4) : 10,
+                  left: myMessage ? (fullWidth(context) / 4) : 0,
                 ),
                 child: Container(
                   padding: EdgeInsets.all(10),
@@ -149,14 +135,14 @@ class ChatScreenPage extends StatelessWidget {
 
   BorderRadius getBorder(bool myMessage) {
     return BorderRadius.only(
-      topLeft: Radius.circular(20),
-      topRight: Radius.circular(20),
-      bottomRight: myMessage ? Radius.circular(0) : Radius.circular(20),
-      bottomLeft: myMessage ? Radius.circular(20) : Radius.circular(0),
+      topLeft: myMessage ? Radius.circular(10) : Radius.circular(0),
+      topRight: Radius.circular(10),
+      bottomRight: myMessage ? Radius.circular(0) : Radius.circular(10),
+      bottomLeft: Radius.circular(10),
     );
   }
 
-  Widget _bottomEntryField() {
+  Widget _bottomEntryField(BuildContext context) {
     return Align(
       alignment: Alignment.bottomLeft,
       child: Column(
@@ -166,18 +152,36 @@ class ChatScreenPage extends StatelessWidget {
             onSubmitted: (val) async {
               // submitMessage();
             },
+            style: TextStyles.titleMedium.white,
             controller: messageController,
-            
             decoration: InputDecoration(
-              contentPadding:
-                  EdgeInsets.only(left: 16, right:16,top: 10),
-              alignLabelWithHint: true,
-              hintText: 'Start with a message...',
-              suffixIcon:IconButton(icon: Icon(Icons.send), onPressed: submitMessage),
-              hintStyle: TextStyles.title.dimWhite,
-              border: InputBorder.none,
-              fillColor: Colors.black12, filled: true
-            ),
+                contentPadding: EdgeInsets.only(left: 16, right: 16, top: 10),
+                alignLabelWithHint: true,
+                hintText: 'Write something',
+                suffixIcon: Container(
+                  width: 50,
+                  height: 50,
+                  alignment: Alignment.centerRight,
+                  child: CircleAvatar(
+                      maxRadius: 50,
+                      backgroundColor: Theme.of(context).secondaryHeaderColor,
+                      child: Transform.rotate(
+                        angle: 1.9 * pi * 2,
+                        child: IconButton(
+                          color: Theme.of(context).primaryColor,
+                          padding: EdgeInsets.all(0),
+                          icon: Icon(
+                            Icons.send,
+                            size: 20,
+                          ),
+                          onPressed: submitMessage,
+                        ),
+                      )).p(8),
+                ),
+                hintStyle: TextStyles.title.dimWhite,
+                border: InputBorder.none,
+                fillColor: Colors.black12,
+                filled: true),
           ).circular,
         ],
       ),
@@ -201,17 +205,22 @@ class ChatScreenPage extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Theme.of(context).backgroundColor,
         appBar: AppBar(
-            leading: IconButton(
+          leading: IconButton(
+              icon: Icon(Icons.keyboard_arrow_left,
+                  size: 40, color: Theme.of(context).iconTheme.color),
+              onPressed: () {
+                Navigator.of(context).pop();
+              }),
+          title: _appBar(context),
+          actions: <Widget>[
+            IconButton(
                 icon: Icon(
-                  Icons.keyboard_arrow_left,
-                  size: 40,
+                  Icons.more_vert,
+                  color: Theme.of(context).iconTheme.color,
                 ),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                }),
-            title: _appBar(context),
-            iconTheme: IconThemeData(color: Colors.blue),
-            backgroundColor: Theme.of(context).secondaryHeaderColor),
+                onPressed: () {})
+          ],
+        ),
         body: SafeArea(
           child: Stack(
             children: <Widget>[
@@ -222,7 +231,7 @@ class ChatScreenPage extends StatelessWidget {
                   child: _chatScreenBody(context),
                 ),
               ),
-              _bottomEntryField()
+              _bottomEntryField(context)
             ],
           ),
         ),
