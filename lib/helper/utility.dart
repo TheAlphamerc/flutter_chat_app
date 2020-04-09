@@ -202,3 +202,13 @@ bool validateEmal(String email) {
   var status = regExp.hasMatch(email);
   return status;
 }
+
+String getChannelName(String user1, String user2) {
+    user1 = user1.substring(0, 5);
+    user2 = user2.substring(0, 5);
+    List<String> list = [user1, user2];
+    list.sort();
+    final channelName = '${list[0]}-${list[1]}';
+    // cprint(_channelName); //2RhfE-5kyFB
+    return channelName;
+  }
