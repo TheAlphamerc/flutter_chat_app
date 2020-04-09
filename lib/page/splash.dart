@@ -14,7 +14,7 @@ class SplashPage extends StatelessWidget {
       body: StreamBuilder(
         stream: Provider.of<AuthState>(context,listen: false).loginStatus,
         builder: (context, AsyncSnapshot<AuthStatus> snapshot) {
-          if(snapshot.data == AuthStatus.NOT_LOGGED_IN){
+          if(snapshot.data == AuthStatus.NOT_LOGGED_IN || snapshot.data == AuthStatus.NOT_DETERMINED){
             return LoginPage();
           }
           return WelcomePage();
