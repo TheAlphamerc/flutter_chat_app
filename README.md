@@ -1,4 +1,6 @@
-# flutter_chat_app
+
+## Flutter Messanger - Flutter Based Twitter Clone ![Twitter URL](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Ftwitter.com%2Fthealphamerc) [![GitHub stars](https://img.shields.io/github/stars/Thealphamerc/flutter_chat_app?style=social)](https://github.com/login?return_to=%2FTheAlphamerc%flutter_wallet_app) ![GitHub forks](https://img.shields.io/github/forks/TheAlphamerc/flutter_chat_app?style=social) 
+![Dart CI](https://github.com/TheAlphamerc/flutter_chat_app/workflows/Dart%20CI/badge.svg) ![GitHub pull requests](https://img.shields.io/github/issues-pr/TheAlphamerc/flutter_chat_app) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed/Thealphamerc/flutter_chat_app) ![GitHub last commit](https://img.shields.io/github/last-commit/Thealphamerc/flutter_chat_app)  ![GitHub issues](https://img.shields.io/github/issues-raw/Thealphamerc/flutter_chat_app) [![Open Source Love](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/Thealphamerc/flutter_chat_app) 
 
 A messenger app built in flutter framework using Firebase auth,realtime database and storage.
 
