@@ -15,8 +15,8 @@ class AppState extends ChangeNotifier {
   }
 
   final repo = getIt<Repository>();
-  // Stream<List<User>> getAllUSerList(String myId) => repo.getAllUsersList();
-  Stream<List<User>> getAllUSerList(String myId) => repo.getChatUsersList(myId);
+  Stream<List<User>> getAllUSerList(String myId) => repo.getAllUsersList();
+  Stream<List<User>> getChatUsersList(String myId) => repo.getChatUsersList(myId);
 
   @override
   void dispose() {

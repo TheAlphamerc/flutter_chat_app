@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_app/locator.dart';
 import 'package:flutter_chat_app/model/user.dart';
-import 'package:flutter_chat_app/service/repository.dart';
 import 'package:flutter_chat_app/state/app_state.dart';
 import 'package:flutter_chat_app/state/auth_state.dart';
 import 'package:flutter_chat_app/state/chat_state.dart';
 import 'package:flutter_chat_app/theme/styles.dart';
-import 'package:flutter_chat_app/widgets/bottomMenuBar.dart';
 import 'package:flutter_chat_app/widgets/customWidgets.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_chat_app/theme/extentions.dart';
 
-class HomePage extends StatelessWidget {
+class SearchPage extends StatelessWidget {
   Widget _appBar(BuildContext context) {
     return Container(
       color: Theme.of(context).secondaryHeaderColor,
@@ -19,48 +16,17 @@ class HomePage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Text('Chats'),
+          Text('Search'),
         ],
       ),
     );
   }
 
-  Widget _favouriteList(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsets.all(16),
-          child: Text(
-            'Favourites',
-            style: TextStyles.bodySm.bold,
-          ),
-        ),
-        SizedBox(
-          height: 60,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemBuilder: (context, index) {
-              return userAvatar(null).p(8);
-            },
-            itemCount: 25,
-          ),
-        ),
-        SizedBox(
-          height: 16,
-        ),
-        Divider(
-          height: 0,
-          color: Theme.of(context).dividerColor,
-        )
-      ],
-    );
-  }
-
+ 
   Widget _userList(BuildContext context) {
     var myId = Provider.of<AuthState>(context).userModel.userId;
     return StreamBuilder(
-      stream: Provider.of<AppState>(context).getChatUsersList(myId),
+      stream: Provider.of<AppState>(context).getAllUSerList(myId),
       builder: (context, AsyncSnapshot<List<User>> snapshot) {
         if (snapshot.hasData) {
           return ListView.builder(
@@ -96,8 +62,8 @@ class HomePage extends StatelessWidget {
         ],
       ),
       subtitle: Text(
-          description(
-              "Is it possible to create an “extension methods” for the Widgets? Is it possible to create an “extension methods” for the Widgets?"),
+          description(model.bio),
+             
           style: TextStyles.bodySm.dimWhite),
     ).vP4.ripple(() {
       var state = Provider.of<AuthState>(context, listen: false);
@@ -128,17 +94,11 @@ class HomePage extends StatelessWidget {
           IconButton(icon: Icon(Icons.search), onPressed: () {}),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: Icon(Icons.add),
-      ),
       body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            _favouriteList(context),
-            _userList(context).extended,
-          ],
-        ),
+        child:  Container(
+          height: fullHeight(context),
+          child:_userList(context)
+        )
       ),
     );
   }

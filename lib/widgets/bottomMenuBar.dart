@@ -31,8 +31,8 @@ class _BottomMenubarState extends State<BottomMenubar> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           _icon(Icons.home, 0),
-          _icon(Icons.message, 1),
-          _icon(Icons.people, 2),
+          _icon(Icons.search, 1),
+          _icon(Icons.person, 2),
           _icon(Icons.settings, 3),
         ],
       ),
