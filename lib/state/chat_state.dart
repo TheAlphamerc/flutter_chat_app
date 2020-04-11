@@ -1,43 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_app/helper/utility.dart';
+import 'package:flutter_chat_app/locator.dart';
 import 'package:flutter_chat_app/model/chat_message.dart';
 import 'package:flutter_chat_app/model/user.dart';
+import 'package:flutter_chat_app/service/firebase_service.dart';
+import 'package:flutter_chat_app/service/repository.dart';
+import 'package:rxdart/rxdart.dart';
 
 class ChatState extends ChangeNotifier {
-  List<ChatMessage> messageList = [
-    ChatMessage(
-      createdAt: DateTime.now().add(Duration(minutes: -4)).toUtc().toString(),
-      key: "asdf",
-      message: "Hello",
-      receiverId: "1234",
-      seen: false,
-      senderId: "abcd",
-      senderName: "Shubham",
-    ),
-    ChatMessage(
-      createdAt: DateTime.now().add(Duration(minutes: -5)).toUtc().toString(),
-      key: "asdf",
-      message: "Hey",
-      receiverId: "1234",
-      seen: false,
-      senderId: "asdf",
-      senderName: "Shubham",
-    ),
-    ChatMessage(
-      createdAt: DateTime.now().add(Duration(days: -4)).toUtc().toString(),
-      key: "asdf",
-      message: "How are you? :)",
-      receiverId: "1234",
-      seen: false,
-      senderId: "asdf",
-      senderName: "Shubham",
-    ),
-    
-  ];
+  BehaviorSubject<User> chatUser = BehaviorSubject();
+  // BehaviorSubject<ChatMessage> chat = BehaviorSubject();
+  // BehaviorSubject<ChatResponse> chatMessageList = BehaviorSubject();
+  // final getit = getIt<FirebaseService>();
+  final repo = getIt<Repository>();
+  List<ChatMessage> messageList = [];
 
-  var chatUser = User(
-    displayName: "Sonu Sharma",
-    userName: "@TheALphamerc",
-    userId: "asdf"
-  );
-  
+  void selectUserToChat(User model, String myId) {
+    chatUser.add(model);
+    channelName = getChannelName(model.userId, myId);
+  }
+
+  static String channelName;
+  Stream<ChatResponse> get getMessageList => repo.getMessageList(channelName);
+  sendMessage(ChatMessage message, User myUser) {
+    repo.sendMessage(message,
+        myUser: myUser, chatUser: chatUser.value, isNewChat: true);
+  }
 }

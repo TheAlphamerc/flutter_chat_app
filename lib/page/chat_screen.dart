@@ -1,10 +1,12 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_app/helper/utility.dart';
+import 'package:flutter_chat_app/locator.dart';
 import 'package:flutter_chat_app/model/chat_message.dart';
 import 'package:flutter_chat_app/model/user.dart';
+import 'package:flutter_chat_app/service/repository.dart';
+import 'package:flutter_chat_app/state/auth_state.dart';
 import 'package:flutter_chat_app/state/chat_state.dart';
 import 'package:flutter_chat_app/theme/styles.dart';
 import 'package:flutter_chat_app/widgets/customWidgets.dart';
@@ -15,61 +17,87 @@ import 'package:flutter_chat_app/theme/extentions.dart';
 class ChatScreenPage extends StatelessWidget {
   ChatScreenPage({Key key}) : super(key: key);
   Widget _appBar(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        userAvatar(null, radius: 20),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text('Michel', style: TextStyles.titleMedium.white),
-            Text('online', style: TextStyles.bodySm.dimWhite),
-          ],
-        ).hP16,
-        Spacer(),
-      ],
-    );
+    var state = Provider.of<ChatState>(context, listen: false);
+    return StreamBuilder(
+        stream: state.chatUser,
+        builder: (context, AsyncSnapshot<User> snapshot) {
+          if (snapshot.hasData) {
+            return Row(
+              children: <Widget>[
+                userAvatar(snapshot.data, radius: 20),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(snapshot.data.displayName,
+                        style: TextStyles.titleMedium.white),
+                    Text('online', style: TextStyles.bodySm.dimWhite),
+                  ],
+                ).hP16,
+                Spacer(),
+              ],
+            );
+          } else {
+            return LinearProgressIndicator();
+          }
+        });
   }
 
   final messageController = new TextEditingController();
   String senderId = "abcd";
   String userImage;
+  String message;
   ScrollController _controller;
-  GlobalKey<ScaffoldState> _scaffoldKey;
 
-  Widget _chatScreenBody(
-    BuildContext context,
-  ) {
+  Widget _messageList(BuildContext context) {
     final state = Provider.of<ChatState>(context);
-    if (state.messageList == null || state.messageList.length == 0) {
-      return Center(
-        child: Text(
-          'No message found',
-          style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
-        ),
-      );
-    }
-    return ListView.builder(
-      controller: _controller,
-      shrinkWrap: true,
-      reverse: true,
-      physics: BouncingScrollPhysics(),
-      itemCount: state.messageList.length,
-      itemBuilder: (context, index) =>
-          chatMessage(context, state.messageList[index]),
+    return StreamBuilder(
+      stream: state.getMessageList,
+      builder: (context, AsyncSnapshot<ChatResponse> snapshot) {
+        if (snapshot.hasData) {
+          return ListView.builder(
+            controller: _controller,
+            shrinkWrap: true,
+            reverse: true,
+            physics: BouncingScrollPhysics(),
+            itemCount: snapshot.data?.data?.length ?? 0,
+            itemBuilder: (context, index) => chatMessage(
+                context, snapshot.data.data[index],
+                isLastMessage: index == 0, index: index),
+          );
+        }
+        if (snapshot.connectionState == ConnectionState.done ||
+            snapshot.connectionState == ConnectionState.active) {
+          return Center(
+            child: Text("No message available"),
+          );
+        }
+        return loader();
+      },
     );
   }
 
-  Widget chatMessage(BuildContext context, ChatMessage message) {
+  Widget chatMessage(BuildContext context, ChatMessage message,
+      {bool isLastMessage, int index}) {
     if (senderId == null) {
       return Container();
     }
     if (message.senderId == senderId)
-      return _message(context, message, true);
+      return _message(context, message, true, isLastMessage: isLastMessage);
     else
-      return _message(context, message, false);
+      return _message(
+        context,
+        message,
+        false,
+        isLastMessage: isLastMessage,
+      );
   }
 
-  Widget _message(BuildContext context, ChatMessage chat, bool myMessage) {
+  Widget _message(
+    BuildContext context,
+    ChatMessage chat,
+    bool myMessage, {
+    bool isLastMessage,
+  }) {
     return Column(
       crossAxisAlignment:
           myMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
@@ -128,7 +156,8 @@ class ChatScreenPage extends StatelessWidget {
           getChatTime(chat.createdAt),
           style:
               Theme.of(context).textTheme.caption.copyWith(fontSize: 12).white,
-        ).hP16
+        ).hP16,
+        SizedBox(height: isLastMessage ? 70 : 0)
       ],
     );
   }
@@ -150,12 +179,15 @@ class ChatScreenPage extends StatelessWidget {
         children: <Widget>[
           TextField(
             onSubmitted: (val) async {
-              // submitMessage();
+              submitMessage(context, val);
+            },
+            onChanged: (val) {
+              message = val;
             },
             style: TextStyles.titleMedium.white,
             controller: messageController,
             decoration: InputDecoration(
-                contentPadding: EdgeInsets.only(left: 16, right: 16, top: 10),
+                contentPadding: EdgeInsets.only(left: 16, right: 0, top: 10),
                 alignLabelWithHint: true,
                 hintText: 'Write something',
                 suffixIcon: Container(
@@ -174,13 +206,15 @@ class ChatScreenPage extends StatelessWidget {
                             Icons.send,
                             size: 20,
                           ),
-                          onPressed: submitMessage,
+                          onPressed: () {
+                            submitMessage(context, message);
+                          },
                         ),
                       )).p(8),
                 ),
                 hintStyle: TextStyles.title.dimWhite,
                 border: InputBorder.none,
-                fillColor: Colors.black12,
+                fillColor: Colors.black54,
                 filled: true),
           ).circular,
         ],
@@ -195,22 +229,43 @@ class ChatScreenPage extends StatelessWidget {
     return true;
   }
 
-  void submitMessage() {}
+  void submitMessage(BuildContext context, String text) {
+    if (text == null || text.isEmpty) {
+      return;
+    }
+    final state = Provider.of<ChatState>(context, listen: false);
+    final authState = Provider.of<AuthState>(context, listen: false);
+    final messageModel = ChatMessage(
+      createdAt: DateTime.now().toUtc().toString(),
+      message: text,
+      receiverId: state.chatUser.value.userId,
+      senderId: authState.user.uid,
+      senderName: authState.user.displayName,
+      seen: false,
+    );
+
+    state.sendMessage(messageModel, authState.userModel);
+    message = "";
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => messageController.clear());
+  }
+
   @override
   Widget build(BuildContext context) {
-    var state = Provider.of<ChatState>(context, listen: false);
-    userImage = state.chatUser.profilePic;
+    final authState = Provider.of<AuthState>(context, listen: false);
+    senderId = authState.user.uid;
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
         backgroundColor: Theme.of(context).backgroundColor,
         appBar: AppBar(
           leading: IconButton(
-              icon: Icon(Icons.keyboard_arrow_left,
-                  size: 40, color: Theme.of(context).iconTheme.color),
-              onPressed: () {
-                Navigator.of(context).pop();
-              }),
+            icon: Icon(Icons.keyboard_arrow_left,
+                size: 40, color: Theme.of(context).iconTheme.color),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
           title: _appBar(context),
           actions: <Widget>[
             IconButton(
@@ -226,10 +281,7 @@ class ChatScreenPage extends StatelessWidget {
             children: <Widget>[
               Align(
                 alignment: Alignment.topRight,
-                child: Padding(
-                  padding: EdgeInsets.only(bottom: 50),
-                  child: _chatScreenBody(context),
-                ),
+                child: _messageList(context),
               ),
               _bottomEntryField(context)
             ],

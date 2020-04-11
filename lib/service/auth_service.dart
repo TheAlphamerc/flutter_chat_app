@@ -11,12 +11,13 @@ import 'package:logger/logger.dart';
 class AuthService {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final _fireStoreInstance = Firestore.instance;
   final DatabaseReference kDatabase = FirebaseDatabase.instance.reference();
   final log = getLogger("AuthService");
   Future<FirebaseUser> handleGoogleSignIn() async {
     try {
       final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-      
+
       if (googleUser == null) {
         throw Exception('Google login cancelled by user');
       }
@@ -28,7 +29,7 @@ class AuthService {
         idToken: googleAuth.idToken,
       );
       var user = (await _firebaseAuth.signInWithCredential(credential)).user;
-      log.log(Level.info,"Google login success");
+      log.log(Level.info, "Google login success");
       return user;
     } catch (error) {
       log.e(error);
@@ -37,27 +38,28 @@ class AuthService {
   }
 
   /// Create user profile from google login
-  createUserFromGoogleSignIn(FirebaseUser user) {
+  User createUserFromGoogleSignIn(FirebaseUser user) {
     var diff = DateTime.now().difference(user.metadata.creationTime);
+    User model = User(
+      bio: 'Edit profile to update bio',
+      dob: DateTime(1950, DateTime.now().month, DateTime.now().day + 3)
+          .toString(),
+      location: 'Somewhere in universe',
+      profilePic: user.photoUrl,
+      displayName: user.displayName,
+      email: user.email,
+      key: user.uid,
+      userId: user.uid,
+      contact: user.phoneNumber,
+      isVerified: user.isEmailVerified,
+    );
     // Check if user is new or old
     // If user is new then add new user to firebase realtime kDatabase
-    if (diff < Duration(seconds: 15)) {
-      User model = User(
-        bio: 'Edit profile to update bio',
-        dob: DateTime(1950, DateTime.now().month, DateTime.now().day + 3)
-            .toString(),
-        location: 'Somewhere in universe',
-        profilePic: user.photoUrl,
-        displayName: user.displayName,
-        email: user.email,
-        key: user.uid,
-        userId: user.uid,
-        contact: user.phoneNumber,
-        isVerified: user.isEmailVerified,
-      );
+    if (diff < Duration(seconds: 25)) {
       createUser(model, newUser: true);
+      log.w("User created");
     }
-      
+    return model;
   }
 
   /// `Create` and `Update` user
@@ -72,13 +74,15 @@ class AuthService {
       user.createdAt = DateTime.now().toUtc().toString();
     }
     kDatabase.child('profile').child(user.userId).set(user.toJson());
-    
-    
-    log.log(Level.info,"User created");
-  }
-  
+    _fireStoreInstance
+        .collection("users")
+        .document(user.userId)
+        .setData(user.toJson());
 
-  void logout(){
+    log.log(Level.info, "User created");
+  }
+
+  void logout() {
     _firebaseAuth.signOut();
     _googleSignIn.signOut();
     log.wtf("Logout Sucess");

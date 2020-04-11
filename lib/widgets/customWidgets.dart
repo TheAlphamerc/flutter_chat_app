@@ -54,7 +54,10 @@ Widget userAvatar(User user, {double radius = 25}) {
         profilePic:
             'http://www.azembelani.co.za/wp-content/uploads/2016/07/20161014_58006bf6e7079-3.png');
   }
-
+  if(user.profilePic == null){
+    print(user.displayName);
+    return Container();
+  }
   return CircleAvatar(radius: radius, backgroundImage: NetworkImage(user.profilePic));
 }
 

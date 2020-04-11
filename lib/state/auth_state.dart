@@ -14,6 +14,7 @@ class AuthState extends ChangeNotifier {
     ..add(AuthStatus.NOT_DETERMINED);
   bool isSignInWithGoogle = false;
   FirebaseUser user;
+
   String userId;
   User _userModel;
 
@@ -25,20 +26,26 @@ class AuthState extends ChangeNotifier {
   /// If the user doesn't have an account already, one will be created automatically.
   loginViaGoogle() {
     getit.handleGoogleSignIn().then((user) {
+      this.user = user;
       loginStatus.add(AuthStatus.LOGGED_IN);
       return user;
     }).then((user) {
-      getit.createUserFromGoogleSignIn(user);
+      _userModel = getit.createUserFromGoogleSignIn(user);
     }).catchError((error) {
       cprint(error, errorIn: "loginViaGoogle");
       loginStatus.add(AuthStatus.NOT_LOGGED_IN);
     });
   }
+
   /// Asynchronously logout from firebase
   logout() {
     getit.logout();
     loginStatus.add(AuthStatus.NOT_LOGGED_IN);
   }
 
-  
+  @override
+  void dispose() {
+    loginStatus.close();
+    super.dispose();
+  }
 }

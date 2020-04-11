@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -212,3 +213,9 @@ String getChannelName(String user1, String user2) {
     // cprint(_channelName); //2RhfE-5kyFB
     return channelName;
   }
+
+  // DateTime time = castTimestampToDateTime(snapshot.data['purchaseDate']);
+///Timestamp to DateTime in a separately method
+castTimestampToDateTime(Timestamp data) {
+  return data.toDate();
+}

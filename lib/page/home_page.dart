@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_app/locator.dart';
 import 'package:flutter_chat_app/model/user.dart';
-import 'package:flutter_chat_app/service/users_repository.dart';
+import 'package:flutter_chat_app/service/repository.dart';
+import 'package:flutter_chat_app/state/app_state.dart';
 import 'package:flutter_chat_app/state/auth_state.dart';
+import 'package:flutter_chat_app/state/chat_state.dart';
 import 'package:flutter_chat_app/theme/styles.dart';
 import 'package:flutter_chat_app/widgets/bottomMenuBar.dart';
 import 'package:flutter_chat_app/widgets/customWidgets.dart';
@@ -56,8 +58,9 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _userList(BuildContext context) {
+    var myId = Provider.of<AuthState>(context).userModel.userId;
     return StreamBuilder(
-      stream: getIt<UsersRepository>().users,
+      stream: Provider.of<AppState>(context).getAllUSerList(myId),
       builder: (context, AsyncSnapshot<List<User>> snapshot) {
         if (snapshot.hasData) {
           return ListView.builder(
@@ -67,10 +70,9 @@ class HomePage extends StatelessWidget {
             itemCount: snapshot.data.length,
           );
         }
-        if(snapshot.connectionState == ConnectionState.done){
+        if (snapshot.connectionState == ConnectionState.done) {
           return Text("No Users Available");
-        }
-        else{
+        } else {
           return loader();
         }
       },
@@ -98,6 +100,9 @@ class HomePage extends StatelessWidget {
               "Is it possible to create an “extension methods” for the Widgets? Is it possible to create an “extension methods” for the Widgets?"),
           style: TextStyles.bodySm.dimWhite),
     ).vP4.ripple(() {
+      var state = Provider.of<AuthState>(context, listen: false);
+      Provider.of<ChatState>(context, listen: false)
+          .selectUserToChat(model, state.userModel.userId);
       Navigator.of(context).pushNamed('/ChatScreenPage');
     });
   }

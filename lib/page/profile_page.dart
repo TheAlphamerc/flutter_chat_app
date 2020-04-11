@@ -10,19 +10,39 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = Provider.of<AuthState>(context, listen: false);
+    final user = state.userModel;
     return SafeArea(
       top: false,
       child: Container(
+        padding: MediaQuery.of(context).viewPadding,
         height: fullHeight(context),
         width: fullHeight(context),
         alignment: Alignment.center,
         color: Theme.of(context).backgroundColor,
-        child: MaterialButton(
-          color: Theme.of(context).primaryColor,
-          onPressed: () {
-            Provider.of<AuthState>(context,listen: false).logout();
-          },
-          child: Text("Log out",style: TextStyles.title.white,),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            userAvatar(state.userModel).p16,
+            Text(
+              user.displayName,
+              style: TextStyles.title,
+            ),
+            Text(
+              user.userName ?? "",
+              style: TextStyles.title,
+            ),
+            MaterialButton(
+              color: Theme.of(context).primaryColor,
+              onPressed: () {
+                Provider.of<AuthState>(context, listen: false).logout();
+              },
+              child: Text(
+                "Log out",
+                style: TextStyles.title.white,
+              ),
+            ).p(16),
+          ],
         ),
       ),
     );
